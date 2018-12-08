@@ -18,12 +18,12 @@ public class Game implements Runnable {
 
         // Top-level frame in which game components live
         // Be sure to change "TOP LEVEL FRAME" to the name of your game
-        final JFrame frame = new JFrame("TOP LEVEL FRAME");
+        final JFrame frame = new JFrame("CANDY CRUSH!");
         frame.setLocation(300, 300);
 
         // Status panel
         final JPanel status_panel = new JPanel();
-        frame.add(status_panel, BorderLayout.SOUTH);
+        frame.add(status_panel, BorderLayout.NORTH);
         final JLabel status = new JLabel("Running...");
         status_panel.add(status);
 
