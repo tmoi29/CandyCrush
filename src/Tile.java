@@ -1,24 +1,53 @@
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import java.awt.*;
 
-public class Tile {
+public class Tile extends JButton{
 	
-	private BufferedImage itemImage;
+	  
+	private int x;
+	private int y;
+	private boolean selected; 
+	private int c;
 	
-	public Tile(int candy) {
-		try {
-            itemImage = ImageIO.read(new File("img/" + (candy+1) + ".png"));
-        } catch (IOException e ) {
-            e.printStackTrace();
-        }
+	
+	public Tile(int candy, int x1, int y1) {
+		super(new ImageIcon("files/" + candy + ".png"));
+		this.setBackground(new Color(178, 178, 255));
+		x = x1;
+		y = y1;
+		selected = false;
+		c = candy;
 	}
 	
-	public void draw(Graphics g, int x, int y) {
-        g.drawImage(itemImage, x, y, TILE_SIZE, TILE_SIZE, null);
-    }
+	public int[] getPoint(){
+		int[] ret = new int[] {x,y};
+		return ret;
+	}
+	
+	public Tile select() {
+		this.setOpaque(true);
+		selected = true;
+		return this;
+	}
+	
+	public JButton deselect() {
+		this.setOpaque(false);
+		selected = false;
+		return this;
+	}
+	
+	public boolean getSelected() {
+		return selected;
+	}
+	
+	public void setCandy(int candy) {
+		c = candy;
+		setIcon(new ImageIcon("files/" + candy + ".png"));
+	}
+	public int getCandy() {
+		return c;
+	}
 	
 }
