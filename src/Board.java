@@ -30,6 +30,25 @@ public class Board extends JPanel{
 		reset();
 	}
 	
+	public Board(int[][] b){
+		board = new Tile[6][6];
+		for (int i = 0; i < b.length; i ++) {
+			for (int j = 0; j < b.length; j++) {
+				board[i][j] = new Tile(b[i][j],j,i);
+			}
+		}
+		score = 0;
+		moves = 15;
+	}
+	
+	public int getScore() {
+		return score;
+	}
+	
+	public int getMoves() {
+		return moves;
+	}
+	
 	private void reset(){
 		this.removeAll(); 
 		
@@ -71,7 +90,6 @@ public class Board extends JPanel{
 	        	while (it2.hasNext()) {
 	        		String n = it2.next();
 	        		st = (c+1) + ".&nbsp;" + n + "&nbsp;&nbsp;&nbsp;&nbsp;" + v + "<br>" + st;
-	        		System.out.println(c);
 	        	}
         	}
         }
@@ -88,6 +106,17 @@ public class Board extends JPanel{
 		else {
 			name = "unknown";
 		}
+		
+		//INSTRUCTIONS 
+		
+		JOptionPane.showMessageDialog(f,
+			    "<html><center><strong>INSTRUCTIONS</strong><center><br><p>It's Candy Crush! "
+			    + "The game that everyone was addicted to!</p> <br>To play, all you need to do is "
+			    + "swap adjacent candies to form a row or <br>column of 3 or more of the same candies."
+			    + " These groups of candies will be <br>eliminated and the candies above them will" 
+			    + " shift down. Each eliminated<br> candy is worth one point. Try to eliminate as many "
+			    + "candies as <br>possible within 15 swaps and move up the leaderboard!</html>");
+		
 		board = new Tile[6][6];
 		for (int i = 0; i < board.length; i ++) {
 			for (int j = 0; j < board.length; j++) {
@@ -102,7 +131,7 @@ public class Board extends JPanel{
 		draw(this,sl, ml,selected);
 	}
 	
-	private Map<Integer,TreeSet<Integer>> checkBoard() {
+	public Map<Integer,TreeSet<Integer>> checkBoard() {
 		Map<Integer,TreeSet<Integer>> m = new TreeMap<Integer,TreeSet<Integer>>();
 		
 		//Check by Rows
@@ -171,16 +200,6 @@ public class Board extends JPanel{
 				}
 			}
 		}
-		Iterator<Integer> it = m.keySet().iterator();
-	    while(it.hasNext()){
-	    	int c = it.next();
-	    	Set<Integer> nums = m.get(c);
-	    	Iterator<Integer> it2 = nums.iterator();
-	    	while(it2.hasNext()) {
-	    		System.out.println("("+it2.next()+"," + c + ")");
-	    		
-	    	}
-	    }
 	    return m;
 	}
 	
@@ -202,19 +221,22 @@ public class Board extends JPanel{
 	    		board[i][col].setCandy((int) (Math.random()*5));
 	    	}
 	    }
-	    System.out.println(ret);
 	    return ret;
 	}
 	
+	public void runOnce() {
+		int val = removeCandy(checkBoard());
+		score += val;
+		if (val > 0) {
+			moves -= 1;
+		}
+		
+	}
 	public int update(){
 		int ret = 0;
 		Map<Integer, TreeSet<Integer>> m = checkBoard();
-		
-		System.out.println(m.size());
 		while (m.size() > 0) {
 			ret += removeCandy(m);
-			printBoard();
-			System.out.println("=======================");
 			m = checkBoard();
 		}
 		return ret;
@@ -231,7 +253,6 @@ public class Board extends JPanel{
 			board[ay][ax].setCandy(board[by][bx].getCandy());
 			board[by][bx].setCandy(old);
 			if (checkBoard().keySet().size() > 0) {
-				printBoard();
 				return true;
 				
 			}
@@ -243,19 +264,35 @@ public class Board extends JPanel{
 		}
 		return false;
 	}
-	
-	public void printBoard() {
+	public int[][] getBoard(){
+		int[][] ret = new int[board.length][board.length];
+		
 		for (int i = 0; i < board.length; i ++) {
 			for (int j = 0; j < board.length; j++) {
-				System.out.print(board[i][j].getCandy());
-				System.out.print(" ");
+				ret[i][j] = board[i][j].getCandy();
 			}
-			System.out.println(" ");
 		}
+		return ret;
+	}
+	
+	public static boolean compareBoards(Board a, Board b) {
+		int[][] aVal = a.getBoard();
+		int[][] bVal = b.getBoard();
+		for (int i = 0; i < aVal.length; i ++) {
+			for (int j = 0; j < aVal.length; j++) {
+				int candyA = aVal[i][j];
+				int candyB = bVal[i][j];
+				if ((candyA != -1) && (candyB != -1)) {
+					if (candyA != candyB) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 	
 	public void deselect(int x, int y) {
-		System.out.println("DESELECT");
 		board[y][x].deselect();
 	}
 	
@@ -275,14 +312,12 @@ public class Board extends JPanel{
 					  else {
 						  selected.add("(" + pt[0] + "," + pt[1] +")");
 						  t.select();
-						  System.out.println("SIZE THING " + selected.size());
 						  if (selected.size() == 2) {
 							  Iterator<String> it = selected.iterator();
 							  int[][] pts = new int[2][2];
 							  int c = 0;
 							  while (it.hasNext()) {
 								  String st = it.next();
-								  System.out.println(st);
 								  String[] point = st.split(",");
 								  int x = Integer.parseInt(point[0].substring(1));
 								  int y = Integer.parseInt(point[1].substring(0,point[1].length()-1));
@@ -291,7 +326,6 @@ public class Board extends JPanel{
 								  c ++;	  	  
 							  }
 							  if (validSwap(pts[0], pts[1])) {
-								  System.out.println("SWAPPP");
 								  p.repaint();
 								  score += update();
 								  moves -= 1;
